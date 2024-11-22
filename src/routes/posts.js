@@ -1,21 +1,24 @@
 import express from "express";
-import listPosts from "../controllers/posts.js";
+import multer from "multer";
+import { listPosts, createPost, saveImage } from "../controllers/posts.js";
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, 'storages/');
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
 
 const routes = (app) => {
     app.use(express.json());
 
     app.get("/posts", listPosts);
-
-    app.get("/posts/:id", (req, res) => {
-        const id = parseInt(req.params.id);
-        const post = posts.find((post) => post.id === id);
-        if (post) {
-            res.status(200).json(post);
-        } else {
-            res.status(404).json({ message: "Post not found" });
-        }
-    });
-
+    app.post("/posts", createPost);
+    app.post("/upload", upload.single("image"), saveImage)
 }
 
 export default routes;
